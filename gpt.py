@@ -2,7 +2,7 @@ import config
 from dotenv import load_dotenv
 import openai
 
-openai.api_key = config.openai_key
+# openai.api_key = config.openai_key
 def GPT_request(age, symptoms):
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",

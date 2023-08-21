@@ -12,11 +12,12 @@ from gpt import GPT_request, GPT_disease_word_search
 
 app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = config.JWT_SECRET_KEY # change this to a random string in production
-cloud_url = "http://localhost:6000"
+CNM_url = "http://localhost:6000"
+KAN_url = "http://localhost:8050"
 jwt = JWTManager(app)
 load_dotenv()
 
-openai.api_key = config.openai_key
+# openai.api_key = config.openai_key
 
 @app.route('/', methods = ['GET'])
 def home():
@@ -27,18 +28,40 @@ def home():
 @app.route('/disease', methods = ['GET', 'POST'])
 @jwt_required()
 def disease():
-    return disease_data(request, cloud_url)
+    return disease_data(request, CNM_url, KAN_url)
 
 @app.route('/care_provider_disease', methods = ['GET', 'POST'])
 @jwt_required()
 def care_provider_disease():
-    return care_provider_disease_data(request, cloud_url)
+    return care_provider_disease_data(request, CNM_url, KAN_url)
 
 @app.route('/disease_name_search', methods = ['GET', 'POST'])
 @jwt_required()
 def disease_name_search():
     GPT_result = [f"{request.json.get('text')}"]
     return GPT_disease_word_search(GPT_result)
+
+@app.route('/disease_info', methods = ['GET', 'POST'])
+@jwt_required()
+def disease_info():
+    # print('test')
+    disease = request.json.get('item')
+    KAN_url_info = f'{KAN_url}/disease_info'
+    data = {'disease': disease}
+    response = requests.post(KAN_url_info, json=data)
+    # print(response.json())
+    return jsonify(response.json())
+
+@app.route('/disease_stats', methods = ['GET', 'POST'])
+@jwt_required()
+def disease_stats():
+    disease = request.json.get('item')
+    symptoms = request.json.get('message')
+    KAN_url_stats = f'{KAN_url}/disease_stats'
+    data = {'disease': disease, 'symptoms': symptoms}
+    response = requests.post(KAN_url_stats, json=data)
+    return jsonify(response.json())
+
 
 # def GPT_request(age, symptoms):
 #     response = openai.ChatCompletion.create(
