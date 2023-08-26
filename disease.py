@@ -21,7 +21,10 @@ def disease_data(request, CNM_url, KAN_url):
         result = requests.post(KAN_url_gpt, json=data)
         result = result.json()
         def run_background_task(result):
-            disease_names = GPT_disease_word_search(result)
+            KAN_url_disease = f'{KAN_url}/GPT_disease_word_search'
+            data = {'result': result}
+            disease_names = requests.post(KAN_url_disease, json=data)
+            disease_names = disease_names.json()
             disease_list_data = disease_names.split(", ")
             disease_list_json = json.dumps(disease_list_data)
             url = f'{CNM_url}/diseases'
@@ -48,7 +51,6 @@ def care_provider_disease_data(request, CNM_url, KAN_url):
         symptoms_list = current_user_info[1]
 
         # result = GPT_request(age, symptoms_list) # Redundent, move to disease stats
-        result = "hi"
         # def run_background_task(result):
         # diseases_names = GPT_disease_word_search(result)
 

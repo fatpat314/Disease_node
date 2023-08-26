@@ -8,7 +8,7 @@ import requests, names, random, threading, uuid, json
 import argparse
 
 from disease import disease_data, care_provider_disease_data
-from gpt import GPT_request, GPT_disease_word_search
+# from gpt import GPT_request, GPT_disease_word_search
 
 app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = config.JWT_SECRET_KEY # change this to a random string in production
@@ -60,6 +60,17 @@ def disease_stats():
     KAN_url_stats = f'{KAN_url}/disease_stats'
     data = {'disease': disease, 'symptoms': symptoms}
     response = requests.post(KAN_url_stats, json=data)
+    return jsonify(response.json())
+
+@app.route('/risk_factors', methods = ['GET', 'POST'])
+@jwt_required()
+def disease_risk_factors():
+    disease = request.json.get('disease_name')
+    # print(disease)
+    KAN_url_risk_factors = f'{KAN_url}/GPT_risk_factors'
+    data = {'disease': disease}
+    response = requests.post(KAN_url_risk_factors, json=data)
+    print(response)
     return jsonify(response.json())
 
 
