@@ -41,7 +41,7 @@ def disease_data(request, CNM_url, KAN_url):
 def care_provider_disease_data(request, CNM_url, KAN_url):
     symptoms_list_data = request.json.get('symptomsData')
     json_list_data = json.dumps(symptoms_list_data)
-    patient_id = request.json.get('inputValue')
+    patient_id = request.json.get('patientID')
     try:
         CNM_disease_data_url = f'{CNM_url}/disease_data'
         data = {'identity': patient_id, 'symptoms': json_list_data}
