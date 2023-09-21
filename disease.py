@@ -32,8 +32,7 @@ def disease_data(request, CNM_url, KAN_url):
             response = requests.post(url, json=data)
         background_thread = threading.Thread(target=run_background_task, args=(result))
         background_thread.start()
-        print(result)
-        return jsonify(result)
+        return(result)
     except Exception as e:
         print(str(e))
         return jsonify({'error': str(e)}), 400
@@ -74,8 +73,7 @@ def care_provider_disease_data(request, CNM_url, KAN_url):
         res = requests.post(CNM_disease_url, json=data)
         # background_thread = threading.Thread(target=run_background_task, args=(result))
         # background_thread.start()
-        print(disease_list)
-        return jsonify(disease_list)
+        return(disease_list, res)
     except Exception as e:
         print(str(e))
         return jsonify({'error': str(e)}), 400

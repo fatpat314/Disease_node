@@ -24,12 +24,33 @@ def home():
 @app.route('/disease', methods = ['GET', 'POST'])
 @jwt_required()
 def disease():
-    return disease_data(request, CNM_url, KAN_url)
+    try:
+        data = disease_data(request, CNM_url, KAN_url)
+    except:
+        return
+    return(data)
 
 @app.route('/care_provider_disease', methods = ['GET', 'POST'])
 @jwt_required()
 def care_provider_disease():
-    return care_provider_disease_data(request, CNM_url, KAN_url)
+    try:
+        disease_data = care_provider_disease_data(request, CNM_url, KAN_url)
+    except:
+        return
+    # get diseases_id
+    diseases_id_list = disease_data[1].json()
+
+    # event
+    symptoms_id = request.json.get('symptomsData')
+    diseases_id = diseases_id_list
+    event_url = get_event_server(CNM_url)
+    event_url = event_url['url']
+    event_url = f'{event_url}/event-symptoms-diseases'
+    data = {'symptoms_id': symptoms_id, 'diseases_id': diseases_id}
+    event_response = requests.post(event_url, json=data)
+    # print("DD", symptoms_id, diseases_id, event_url)
+
+    return jsonify(disease_data[0])
 
 @app.route('/disease_name_search', methods = ['GET', 'POST'])
 @jwt_required()
@@ -58,16 +79,18 @@ def disease_stats():
     response = requests.post(KAN_url_stats, json=data)
     return jsonify(response.json())
 
-# @app.route('/risk_factors', methods = ['GET', 'POST'])
-# @jwt_required()
-# def disease_risk_factors():
-#     disease = request.json.get('disease_name')
-#     # print(disease)
-#     KAN_url_risk_factors = f'{KAN_url}/GPT_risk_factors'
-#     data = {'disease': disease}
-#     response = requests.post(KAN_url_risk_factors, json=data)
-#     print(response)
-#     return jsonify(response.json())
+def get_event_server(cloud_url):
+    event_url = f'{cloud_url}/event_server'
+    response = requests.get(event_url)
+    return response.json()
+
+# def get_diseases_id(disease_name_list, cloud_url):
+#     get_id_url = f'{cloud_url}/diseases_id'
+#     data = {'diseases': disease_name_list}
+#     response = requests.get(get_id_url, json=data)
+#     print("DISEASE_ID_LIST", response)
+#     return(response)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
