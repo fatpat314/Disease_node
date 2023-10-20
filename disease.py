@@ -77,3 +77,13 @@ def care_provider_disease_data(request, CNM_url, KAN_url):
     except Exception as e:
         print(str(e))
         return jsonify({'error': str(e)}), 400
+
+def relate_key_symptoms(symptoms, disease, CNM_url):
+    try:
+        CNM_relate_symptoms_url = f'{CNM_url}/key_symptom_relationships'
+        data = {'symptoms': symptoms, 'disease': disease}
+        response = requests.post(CNM_relate_symptoms_url, json=data)
+        return(response)
+    except:
+        print("err")
+    return("hi")

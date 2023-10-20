@@ -4,9 +4,9 @@ from flask import Flask, jsonify, request, session, g
 from flask_jwt_extended import JWTManager, jwt_required, \
                                create_access_token, get_jwt_identity
 import requests, names, random, threading, uuid, json
-import argparse
+import argparse, ast
 
-from disease import disease_data, care_provider_disease_data
+from disease import disease_data, care_provider_disease_data, relate_key_symptoms
 
 app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = config.JWT_SECRET_KEY # change this to a random string in production
@@ -78,6 +78,31 @@ def disease_stats():
     data = {'disease': disease, 'symptoms': symptoms}
     response = requests.post(KAN_url_stats, json=data)
     return jsonify(response.json())
+
+@app.route('/key_symptoms', methods = ['GET', 'POST'])
+@jwt_required()
+def key_symptoms():
+    disease = request.json.get('disease_name')
+    try:
+        KAN_url_key_symptoms = f'{KAN_url}/GPT_key_symptoms'
+        data = {'disease': disease}
+        response = requests.post(KAN_url_key_symptoms, json=data)
+        key_symptoms_list = response.json()
+        symptoms_list = ast.literal_eval(key_symptoms_list[0])
+        relationship = relate_key_symptoms(symptoms_list, disease, CNM_url)
+        relationship = relationship.json()
+        # print("RELATIONSHIP", relationship.json())
+        symptoms_id = relationship[1]
+        diseases_id = relationship[0]
+        event_url = get_event_server(CNM_url)
+        event_url = event_url['url']
+        event_url = f'{event_url}/event-key-symptoms'
+        data = {'symptoms_id': symptoms_id, 'diseases_id': diseases_id}
+        event_response = requests.post(event_url, json=data)
+        print("HELP!!!!")
+        return jsonify(symptoms_list)
+    except:
+        return("ERR")
 
 def get_event_server(cloud_url):
     event_url = f'{cloud_url}/event_server'
