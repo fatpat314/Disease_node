@@ -2,7 +2,6 @@ from flask import jsonify, request
 import requests, json, threading
 from flask_jwt_extended import get_jwt_identity
 
-# from gpt import GPT_request, GPT_disease_word_search, GPT_symptoms_disease_correlation
 
 def disease_data(request, CNM_url, KAN_url):
     symptoms_list_data = request.json.get('symptomsData')
@@ -41,6 +40,7 @@ def care_provider_disease_data(request, CNM_url, KAN_url):
     symptoms_list_data = request.json.get('symptomsData')
     json_list_data = json.dumps(symptoms_list_data)
     patient_id = request.json.get('patientID')
+    print("HELLO")
     try:
         CNM_disease_data_url = f'{CNM_url}/disease_data'
         data = {'identity': patient_id, 'symptoms': json_list_data}
